@@ -6,4 +6,5 @@
     <color name="barColor">#990066</color>
     <color name="backGroundColor">#ffcc00</color>
     <color name="cardColor">#cc0033</color>
+    <color name="white">#ffffff</color>
 </resources>
