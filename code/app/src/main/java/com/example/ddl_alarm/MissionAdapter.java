@@ -70,6 +70,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
         };
         timer.start();
         Bitmap bitmap = null;
+        holder.missionPic.setImageResource(R.mipmap.ic_launcher);
         try{
             byte[] bitmapByte = Base64.decode(mission.getBase64(),Base64.DEFAULT);
             bitmap = BitmapFactory.decodeByteArray(bitmapByte,0,bitmapByte.length);
