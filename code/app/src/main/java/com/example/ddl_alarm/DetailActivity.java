@@ -3,7 +3,9 @@ package com.example.ddl_alarm;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -16,6 +18,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.Date;
 
 public class DetailActivity extends AppCompatActivity {
@@ -23,24 +27,32 @@ public class DetailActivity extends AppCompatActivity {
     private ImageView pic;
     private TextView content;
     private TextView ddl;
-    private Button toEdit;
+    private FloatingActionButton toEdit;
+    private Button finish;
 
-    private long id;
+    private int id;
     private String title;
     private String contentString;
     private Date ddlDate;
     private String base64;
 
+    private MyDatabaseHelper dbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+
+        dbHelper = new MyDatabaseHelper(this,"MissionStore.db",null,1);
+
         final Intent intent = getIntent();
         toolbar = (Toolbar)findViewById(R.id.detail_toolbar);
         pic = (ImageView)findViewById(R.id.detail_pic);
         content = (TextView)findViewById(R.id.detail_content);
         ddl = (TextView)findViewById(R.id.detail_ddl);
-        toEdit = (Button)findViewById(R.id.detail_toEdit);
+        toEdit = (FloatingActionButton) findViewById(R.id.detail_toEdit);
+        finish = (Button)findViewById(R.id.detail_finish);
+
         id = intent.getIntExtra("id",-1);
         Toast.makeText(this,"id: "+id,Toast.LENGTH_SHORT).show();
         title = intent.getStringExtra("title");
@@ -53,7 +65,7 @@ public class DetailActivity extends AppCompatActivity {
 
         Bitmap bitmap = null;
         try{
-            byte[] bitmapByte = Base64.decode(intent.getStringExtra("base64"),Base64.DEFAULT);
+            byte[] bitmapByte = Base64.decode(base64,Base64.DEFAULT);
             bitmap = BitmapFactory.decodeByteArray(bitmapByte,0,bitmapByte.length);
         }catch (Exception e){
             e.printStackTrace();
@@ -73,6 +85,16 @@ public class DetailActivity extends AppCompatActivity {
                 intentNew.putExtra("content",contentString);
                 intentNew.putExtra("ddl",ddlDate);
                 startActivity(intentNew);
+            }
+        });
+
+        finish.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                ContentValues values = new ContentValues();
+                values.put("status",2);
+                db.update("Missions",values,"name = ?",new String[]{id+""});
             }
         });
 

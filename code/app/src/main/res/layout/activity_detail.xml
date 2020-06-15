@@ -58,8 +58,8 @@
             android:layout_weight="1"
             android:background="#000000"
             android:textColor="@color/white"
-            android:text="编辑"
-            android:id="@+id/detail_toEdit"
+            android:text="完成"
+            android:id="@+id/detail_finish"
             />
         <Button
             android:layout_width="match_parent"
@@ -68,6 +68,16 @@
 
         </LinearLayout>
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_gravity="bottom|end"
+            android:id="@+id/detail_toEdit"
+            android:src="@drawable/ic_edit"
+            app:backgroundTint="#ff0000"/>
+
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 
 </LinearLayout>
