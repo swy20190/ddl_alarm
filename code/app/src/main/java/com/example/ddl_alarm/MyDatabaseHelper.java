@@ -11,7 +11,8 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
             + "title text, "
             + "base64 text, "
             + "content text, "
-            + "ddl text)";
+            + "ddl text, "
+            + "status integer)";
     private Context mContext;
 
     public MyDatabaseHelper(Context context, String name,

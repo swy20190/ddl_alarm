@@ -17,8 +17,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,11 +37,14 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 public class EditActivity extends AppCompatActivity {
     private static final int TAKE_PHOTO = 1;
@@ -67,11 +72,16 @@ public class EditActivity extends AppCompatActivity {
     private int mHour;
     private int mMinute;
 
+    private MyDatabaseHelper dbHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
+
+        dbHelper = new MyDatabaseHelper(this,"MissionStore.db",null,1);
+
 
         mCalendar = Calendar.getInstance();
         mDate = mCalendar.get(Calendar.DATE);
@@ -156,12 +166,78 @@ public class EditActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(id == -1){
                     // TODO insert
+                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+                    String insetTitle = title.getText().toString();
+                    Bitmap insertBitmap = ((BitmapDrawable)((ImageView) pic).getDrawable()).getBitmap();
+                    String insertBase64 = bitmapToBase64(insertBitmap);
+                    if(insertBase64 == null){
+                        insertBase64 = "";
+                    }
+                    String insertDDL = ddlDate.getText().toString().replace('/','.')
+                            + "."
+                            + ddlTime.getText().toString().replace(':','.');
+                    String insertContent = content.getText().toString();
+                    ContentValues values = new ContentValues();
+                    values.put("title",insetTitle);
+                    values.put("base64",insertBase64);
+                    values.put("content",insertContent);
+                    values.put("ddl",insertDDL);
+
+                    int insertStatus = 0;
+                    if(compareTime(insertDDL)){
+                        insertStatus = 0;
+                    }else{
+                        insertStatus = 1;
+                    }
+                    values.put("status",insertStatus);
+                    db.insert("Missions",null,values);
+                    values.clear();
+
+
+
                 }
                 else{
                     // TODO update
                 }
             }
         });
+    }
+
+    private String bitmapToBase64(Bitmap bitmap){
+        String result = null;
+        ByteArrayOutputStream baos = null;
+        try{
+            if(bitmap!=null){
+                baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 40, baos);
+                baos.flush();
+                baos.close();
+                byte[] bitmapBytes = baos.toByteArray();
+                result = Base64.encodeToString(bitmapBytes, Base64.DEFAULT);
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }finally {
+            try{
+                if(baos!=null){
+                    baos.flush();
+                    baos.close();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    private boolean compareTime(String ddl){
+        Calendar ddlCalendar = Calendar.getInstance();
+        String[] splitDDL = ddl.split(".");
+        ddlCalendar = new GregorianCalendar(Integer.parseInt(splitDDL[0]),Integer.parseInt(splitDDL[1])-1,
+                Integer.parseInt(splitDDL[2]),Integer.parseInt(splitDDL[3]),Integer.parseInt(splitDDL[4]));
+        Calendar now = Calendar.getInstance();
+        return now.getTimeInMillis() < ddlCalendar.getTimeInMillis();
+
     }
 
 
