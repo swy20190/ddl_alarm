@@ -1,5 +1,6 @@
 package com.example.ddl_alarm;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.CountDownTimer;
@@ -19,6 +20,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHolder> {
     private ArrayList<Mission> mMissionList;
     static class ViewHolder extends RecyclerView.ViewHolder{
+        View missionView;
         CircleImageView missionPic;
         TextView title;
         TextView ddl;
@@ -26,6 +28,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
 
         public ViewHolder(View view){
             super(view);
+            missionView = view;
             missionPic = (CircleImageView) view.findViewById(R.id.mission_item_pic);
             title = (TextView) view.findViewById(R.id.mission_item_title);
             ddl = (TextView) view.findViewById(R.id.mission_time_ddl);
@@ -39,7 +42,21 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.mission_item,parent,false);
-        ViewHolder holder = new ViewHolder(view);
+        final ViewHolder holder = new ViewHolder(view);
+        holder.missionView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = holder.getAdapterPosition();
+                Mission currentMission = mMissionList.get(position);
+                Intent intent = new Intent(v.getContext(),DetailActivity.class);
+                intent.putExtra("title",currentMission.getTitle());
+                intent.putExtra("id",currentMission.getId());
+                intent.putExtra("content",currentMission.getContent());
+                intent.putExtra("base64",currentMission.getBase64());
+                intent.putExtra("ddl",currentMission.getDdl());
+                v.getContext().startActivity(intent);
+            }
+        });
         return holder;
     }
 

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android = "http://schemas.android.com/apk/res/android"
+    xmlns:app = "http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backGroundColor">
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.Toolbar
+                app:layout_scrollFlags="scroll|enterAlways"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="#000000"
+
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"
+                android:id="@+id/detail_toolbar"/>
+        </com.google.android.material.appbar.AppBarLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="5"
+            android:id="@+id/detail_pic"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:contentDescription="TODO"
+            android:src="@mipmap/ic_launcher"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:id="@+id/detail_content"
+            android:textColor="@color/white"
+            android:text="content"
+            android:background="@color/cardColor"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:id="@+id/detail_ddl"
+            android:layout_weight="1"
+            android:textSize="20dp"
+            android:text="ddl"
+            android:textColor="@color/white"
+            android:background="@color/backGroundColor"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#000000"
+            android:textColor="@color/white"
+            android:text="编辑"
+            android:id="@+id/detail_toEdit"
+            />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+        </LinearLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</LinearLayout>

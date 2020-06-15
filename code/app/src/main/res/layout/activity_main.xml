@@ -16,8 +16,8 @@
         app:layout_scrollFlags="scroll|enterAlways"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/barColor"
-        android:theme="@style/ThemeOverlay.AppCompat.Light"
+        android:background="#000000"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark"
         android:id="@+id/main_toolbar"/>
     </com.google.android.material.appbar.AppBarLayout>
     <androidx.recyclerview.widget.RecyclerView
