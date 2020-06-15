@@ -29,6 +29,7 @@ public class DetailActivity extends AppCompatActivity {
     private String title;
     private String contentString;
     private Date ddlDate;
+    private String base64;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,7 @@ public class DetailActivity extends AppCompatActivity {
         Toast.makeText(this,"id: "+id,Toast.LENGTH_SHORT).show();
         title = intent.getStringExtra("title");
         contentString = intent.getStringExtra("content");
+        base64 = intent.getStringExtra("base64");
         ddlDate = (Date)intent.getSerializableExtra("ddl");
 
 
