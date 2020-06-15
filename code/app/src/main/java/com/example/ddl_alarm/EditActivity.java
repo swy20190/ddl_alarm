@@ -165,9 +165,8 @@ public class EditActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(id == -1){
-                    // TODO insert
                     SQLiteDatabase db = dbHelper.getWritableDatabase();
-                    String insetTitle = title.getText().toString();
+                    String insertTitle = title.getText().toString();
                     Bitmap insertBitmap = ((BitmapDrawable)((ImageView) pic).getDrawable()).getBitmap();
                     String insertBase64 = bitmapToBase64(insertBitmap);
                     if(insertBase64 == null){
@@ -178,7 +177,7 @@ public class EditActivity extends AppCompatActivity {
                             + ddlTime.getText().toString().replace(':','.');
                     String insertContent = content.getText().toString();
                     ContentValues values = new ContentValues();
-                    values.put("title",insetTitle);
+                    values.put("title",insertTitle);
                     values.put("base64",insertBase64);
                     values.put("content",insertContent);
                     values.put("ddl",insertDDL);
@@ -198,6 +197,33 @@ public class EditActivity extends AppCompatActivity {
                 }
                 else{
                     // TODO update
+                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+                    String updateTitle = title.getText().toString();
+                    Bitmap updateBitmap = ((BitmapDrawable)((ImageView) pic).getDrawable()).getBitmap();
+                    String updateBase64 = bitmapToBase64(updateBitmap);
+                    if(updateBase64 == null){
+                        updateBase64 = "";
+                    }
+                    String updateDDL = ddlDate.getText().toString().replace('/','.')
+                            + "."
+                            + ddlTime.getText().toString().replace(':','.');
+                    String updateContent = content.getText().toString();
+                    ContentValues values = new ContentValues();
+                    values.put("title",updateTitle);
+                    values.put("base64",updateBase64);
+                    values.put("content",updateContent);
+                    values.put("ddl",updateDDL);
+
+                    int updateStatus = 0;
+                    if(compareTime(updateDDL)){
+                        updateStatus = 0;
+                    }else{
+                        updateStatus = 1;
+                    }
+                    values.put("status",updateStatus);
+                    db.update("Missions",values,"id = ?",new String[]{id+""});
+                    values.clear();
+
                 }
             }
         });
