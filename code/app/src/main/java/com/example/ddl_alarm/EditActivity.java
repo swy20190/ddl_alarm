@@ -58,7 +58,7 @@ public class EditActivity extends AppCompatActivity {
     private String contentString;
     private Date ddl;
     private Calendar mCalendar;
-    private long id;
+    private int id;
 
     private int mDate;
     private int mMonth;
@@ -92,7 +92,7 @@ public class EditActivity extends AppCompatActivity {
         base64 = intent.getStringExtra("base64");
         contentString = intent.getStringExtra("content");
         ddl = (Date)intent.getSerializableExtra("ddl");
-        id = intent.getLongExtra("id",-1);
+        id = intent.getIntExtra("id",-1);
 
 
 

@@ -41,7 +41,7 @@ public class DetailActivity extends AppCompatActivity {
         content = (TextView)findViewById(R.id.detail_content);
         ddl = (TextView)findViewById(R.id.detail_ddl);
         toEdit = (Button)findViewById(R.id.detail_toEdit);
-        id = intent.getLongExtra("id",-1);
+        id = intent.getIntExtra("id",-1);
         Toast.makeText(this,"id: "+id,Toast.LENGTH_SHORT).show();
         title = intent.getStringExtra("title");
         contentString = intent.getStringExtra("content");

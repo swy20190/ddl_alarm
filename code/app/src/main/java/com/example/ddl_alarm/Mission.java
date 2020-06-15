@@ -7,9 +7,9 @@ public class Mission {
     private String title;
     private String content;
     private Date ddl;
-    private long id;
+    private int id;
 
-    public Mission(String title, String base64, String content, Date ddl, long id){
+    public Mission(String title, String base64, String content, Date ddl, int id){
         this.title = title;
         this.base64 = base64;
         this.content = content;
@@ -28,7 +28,7 @@ public class Mission {
     Date getDdl(){
         return this.ddl;
     }
-    long getId(){
+    int getId(){
         return this.id;
     }
 }
