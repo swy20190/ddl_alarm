@@ -86,7 +86,7 @@ public class EditActivity extends AppCompatActivity {
 
         mCalendar = Calendar.getInstance();
         mDate = mCalendar.get(Calendar.DATE);
-        mMonth = mCalendar.get(Calendar.MONTH) + 1;
+        mMonth = mCalendar.get(Calendar.MONTH);
         mYear = mCalendar.get(Calendar.YEAR);
         mHour = mCalendar.get(Calendar.HOUR_OF_DAY);
         mMinute = mCalendar.get(Calendar.MINUTE);
@@ -126,7 +126,7 @@ public class EditActivity extends AppCompatActivity {
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                                ddlDate.setText(year + "/" + month + "/" + dayOfMonth);
+                                ddlDate.setText(year + "/" + (month+1) + "/" + dayOfMonth);
                             }
                         }, mYear, mMonth, mDate);
                 datePickerDialog.show();
@@ -163,7 +163,7 @@ public class EditActivity extends AppCompatActivity {
             content.setText(contentString);
 
             ddlDate.setText(ddl.getYear() + 1900 + "/" + (ddl.getMonth() + 1) + "/" + ddl.getDate());
-            ddlTime.setText(ddl.getHours() + " : " + ddl.getMinutes());
+            ddlTime.setText(ddl.getHours() + ":" + ddl.getMinutes());
 
         }
         pic.setOnClickListener(new View.OnClickListener() {
