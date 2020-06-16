@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.widget.Toolbar;
@@ -53,6 +54,24 @@ public class FinishedActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item){
+        int position;
+        position = adapter.getPosition();
+        switch (item.getItemId()){
+            case 0:
+                int idDelete = missions.get(position).getId();
+                SQLiteDatabase dbDelete = dbHelper.getWritableDatabase();
+                dbDelete.delete("Missions","id = ?", new String[]{idDelete+""});
+                missions.remove(position);
+                refreshMissions();
+                break;
+            default:
+                break;
+        }
+        return super.onContextItemSelected(item);
     }
 
     private void initMissions(){
