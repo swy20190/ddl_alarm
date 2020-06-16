@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -26,6 +27,10 @@ public class MainActivity extends AppCompatActivity {
 
     private MyDatabaseHelper dbHelper;
 
+    private SwipeRefreshLayout swipeRefreshLayout;
+
+    private MissionAdapter adapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        MissionAdapter adapter = new MissionAdapter(missions);
+        adapter = new MissionAdapter(missions);
         recyclerView.setAdapter(adapter);
 
         FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.main_fab);
@@ -52,9 +57,19 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.main_swipe);
+        swipeRefreshLayout.setColorSchemeResources(R.color.backGroundColor);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshMissions();
+            }
+        });
     }
 
     private void initMissions(){
+        missions.clear();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.query("Missions",null,"status = ?",new String[]{0+""},null,null,"ddl");
         if(cursor.moveToFirst()){
@@ -76,5 +91,21 @@ public class MainActivity extends AppCompatActivity {
             }while(cursor.moveToNext());
         }
         cursor.close();
+    }
+
+    private void refreshMissions(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                initMissions();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.notifyDataSetChanged();
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                });
+            }
+        }).start();
     }
 }
