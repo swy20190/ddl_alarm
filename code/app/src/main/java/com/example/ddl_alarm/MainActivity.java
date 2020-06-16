@@ -2,6 +2,7 @@ package com.example.ddl_alarm;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         toolbar.setTitle("未完成的任务");
+        setSupportActionBar(toolbar);
         initMissions();
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.main_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -70,6 +73,32 @@ public class MainActivity extends AppCompatActivity {
                 refreshMissions();
             }
         });
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.toolbar,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()){
+            case R.id.toolbar_toFinished:
+                Intent intent2Finished = new Intent(MainActivity.this, FinishedActivity.class);
+                startActivity(intent2Finished);
+                break;
+            case R.id.toolbar_toTimeout:
+                Intent intent2Timeout = new Intent(MainActivity.this,TimeoutActivity.class);
+                startActivity(intent2Timeout);
+                break;
+            case R.id.toolbar_toAbout:
+                Intent intent2About = new Intent(MainActivity.this,AboutActivity.class);
+                startActivity(intent2About);
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.example.ddl_alarm;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.CountDownTimer;
@@ -21,6 +23,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHolder> {
 
     private ArrayList<Mission> mMissionList;
+
+    private MyDatabaseHelper dbHelper;
 
     private int position;
     static class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener{
@@ -53,6 +57,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
     }
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
+        dbHelper = new MyDatabaseHelper(parent.getContext(),"MissionStore.db",null,1);
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.mission_item,parent,false);
         final ViewHolder holder = new ViewHolder(view);
         holder.missionView.setOnClickListener(new View.OnClickListener() {
@@ -75,7 +80,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position){
-        Mission mission = mMissionList.get(position);
+        final Mission mission = mMissionList.get(position);
         holder.title.setText(mission.getTitle());
         holder.ddl.setText("ddl: "+mission.getDdl().toString());
         Date now = new Date();
@@ -96,6 +101,10 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
             public void onFinish() {
                 holder.time2ddl.setText("已超时");
                 //TODO update database
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                ContentValues values = new ContentValues();
+                values.put("status",1);
+                db.update("Missions",values,"id = ?",new String[]{mission.getId()+""});
             }
         };
         timer.start();
