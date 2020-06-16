@@ -52,7 +52,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
                 intent.putExtra("title",currentMission.getTitle());
                 intent.putExtra("id",currentMission.getId());
                 intent.putExtra("content",currentMission.getContent());
-                intent.putExtra("base64",currentMission.getBase64());
+                // intent.putExtra("base64",currentMission.getBase64());
                 intent.putExtra("ddl",currentMission.getDdl());
                 v.getContext().startActivity(intent);
             }
@@ -74,7 +74,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
                 long totalMinute = millisUntilFinished/60000;
                 long showMinute = totalMinute % 60;
                 long totalHour = totalMinute/60;
-                long showHour = totalHour % 60;
+                long showHour = totalHour % 24;
                 long showDay = totalHour/24;
                 holder.time2ddl.setText("距ddl还有"+showDay+"天 "+showHour+"时 "+showMinute+"分");
             }

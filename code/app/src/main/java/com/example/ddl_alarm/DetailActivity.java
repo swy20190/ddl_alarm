@@ -5,6 +5,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -57,7 +58,16 @@ public class DetailActivity extends AppCompatActivity {
         Toast.makeText(this,"id: "+id,Toast.LENGTH_SHORT).show();
         title = intent.getStringExtra("title");
         contentString = intent.getStringExtra("content");
-        base64 = intent.getStringExtra("base64");
+        // base64 = intent.getStringExtra("base64");
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.query("Missions",null,"id = ?",new String[]{id+""},null,null,null);
+        if(cursor.moveToFirst()){
+            do{
+                base64 = cursor.getString(cursor.getColumnIndex("base64"));
+            }while (cursor.moveToNext());
+        }
+        cursor.close();
         ddlDate = (Date)intent.getSerializableExtra("ddl");
 
 

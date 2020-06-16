@@ -74,36 +74,49 @@ public class EditActivity extends AppCompatActivity {
 
     private MyDatabaseHelper dbHelper;
 
+    private boolean isCreated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
 
-        dbHelper = new MyDatabaseHelper(this,"MissionStore.db",null,1);
+        dbHelper = new MyDatabaseHelper(this, "MissionStore.db", null, 1);
 
 
         mCalendar = Calendar.getInstance();
         mDate = mCalendar.get(Calendar.DATE);
-        mMonth = mCalendar.get(Calendar.MONTH)+1;
+        mMonth = mCalendar.get(Calendar.MONTH) + 1;
         mYear = mCalendar.get(Calendar.YEAR);
         mHour = mCalendar.get(Calendar.HOUR_OF_DAY);
         mMinute = mCalendar.get(Calendar.MINUTE);
 
-        title = (EditText)findViewById(R.id.edit_title);
-        pic = (ImageView)findViewById(R.id.edit_photo);
-        content = (EditText)findViewById(R.id.edit_content);
-        ddlDate = (TextView)findViewById(R.id.edit_ddl_date);
-        ddlTime = (TextView)findViewById(R.id.edit_ddl_time);
-        save = (Button)findViewById(R.id.edit_save);
+        title = (EditText) findViewById(R.id.edit_title);
+        pic = (ImageView) findViewById(R.id.edit_photo);
+        content = (EditText) findViewById(R.id.edit_content);
+        ddlDate = (TextView) findViewById(R.id.edit_ddl_date);
+        ddlTime = (TextView) findViewById(R.id.edit_ddl_time);
+        save = (Button) findViewById(R.id.edit_save);
 
         Intent intent = getIntent();
         titleString = intent.getStringExtra("title");
-        base64 = intent.getStringExtra("base64");
-        contentString = intent.getStringExtra("content");
-        ddl = (Date)intent.getSerializableExtra("ddl");
-        id = intent.getIntExtra("id",-1);
+        // base64 = intent.getStringExtra("base64");
 
+        contentString = intent.getStringExtra("content");
+        ddl = (Date) intent.getSerializableExtra("ddl");
+        id = intent.getIntExtra("id", -1);
+
+
+        if(id!=-1){
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            Cursor cursor = db.query("Missions",null,"id = ?",new String[]{id+""},null,null,null);
+            if(cursor.moveToFirst()){
+                do{
+                    base64 = cursor.getString(cursor.getColumnIndex("base64"));
+                }while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
 
 
         ddlDate.setOnClickListener(new View.OnClickListener() {
@@ -113,9 +126,9 @@ public class EditActivity extends AppCompatActivity {
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                                ddlDate.setText(year+"/"+month+"/"+dayOfMonth);
+                                ddlDate.setText(year + "/" + month + "/" + dayOfMonth);
                             }
-                        },mYear,mMonth,mDate);
+                        }, mYear, mMonth, mDate);
                 datePickerDialog.show();
             }
         });
@@ -127,31 +140,30 @@ public class EditActivity extends AppCompatActivity {
                         new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                ddlTime.setText(hourOfDay+":"+minute);
+                                ddlTime.setText(hourOfDay + ":" + minute);
                             }
-                        },mHour,mMinute,true);
+                        }, mHour, mMinute, true);
                 timePickerDialog.show();
             }
         });
 
-        if(id == -1){
+        if (id == -1) {
             // new mission
-        }
-        else{
+        } else {
             title.setText(titleString);
             Bitmap bitmap = null;
-            try{
-                byte[] bitmapByte = Base64.decode(base64,Base64.DEFAULT);
-                bitmap = BitmapFactory.decodeByteArray(bitmapByte,0,bitmapByte.length);
-            }catch(Exception e){
+            try {
+                byte[] bitmapByte = Base64.decode(base64, Base64.DEFAULT);
+                bitmap = BitmapFactory.decodeByteArray(bitmapByte, 0, bitmapByte.length);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             pic.setImageBitmap(bitmap);
 
             content.setText(contentString);
 
-            ddlDate.setText(ddl.getYear()+1900+"/"+(ddl.getMonth()+1)+"/"+ddl.getDate());
-            ddlTime.setText(ddl.getHours()+" : "+ddl.getMinutes());
+            ddlDate.setText(ddl.getYear() + 1900 + "/" + (ddl.getMonth() + 1) + "/" + ddl.getDate());
+            ddlTime.setText(ddl.getHours() + " : " + ddl.getMinutes());
 
         }
         pic.setOnClickListener(new View.OnClickListener() {
@@ -164,63 +176,69 @@ public class EditActivity extends AppCompatActivity {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(id == -1){
-                    SQLiteDatabase db = dbHelper.getWritableDatabase();
-                    String insertTitle = title.getText().toString();
-                    Bitmap insertBitmap = ((BitmapDrawable)((ImageView) pic).getDrawable()).getBitmap();
-                    String insertBase64 = bitmapToBase64(insertBitmap);
-                    if(insertBase64 == null){
-                        insertBase64 = "";
+                if (id == -1) {
+                    if (!isCreated) {
+                        isCreated = true;
+                        SQLiteDatabase db = dbHelper.getWritableDatabase();
+                        String insertTitle = title.getText().toString();
+                        Bitmap insertBitmap = ((BitmapDrawable) ((ImageView) pic).getDrawable()).getBitmap();
+                        String insertBase64 = bitmapToBase64(insertBitmap);
+                        if (insertBase64 == null) {
+                            insertBase64 = "";
+                        }
+                        String insertDDL = ddlDate.getText().toString().replace('/', '.')
+                                + "."
+                                + ddlTime.getText().toString().replace(':', '.');
+                        String insertContent = content.getText().toString();
+                        ContentValues values = new ContentValues();
+                        values.put("title", insertTitle);
+                        values.put("base64", insertBase64);
+                        values.put("content", insertContent);
+                        values.put("ddl", insertDDL);
+
+                        int insertStatus = 0;
+                        if (compareTime(insertDDL)) {
+                            insertStatus = 0;
+                        } else {
+                            insertStatus = 1;
+                        }
+                        values.put("status", insertStatus);
+                        db.insert("Missions", null, values);
+                        values.clear();
+                        Intent intent2Main = new Intent(EditActivity.this, MainActivity.class);
+                        startActivity(intent2Main);
+                    } else {
+                        Intent intent2Main = new Intent(EditActivity.this, MainActivity.class);
+                        startActivity(intent2Main);
                     }
-                    String insertDDL = ddlDate.getText().toString().replace('/','.')
-                            + "."
-                            + ddlTime.getText().toString().replace(':','.');
-                    String insertContent = content.getText().toString();
-                    ContentValues values = new ContentValues();
-                    values.put("title",insertTitle);
-                    values.put("base64",insertBase64);
-                    values.put("content",insertContent);
-                    values.put("ddl",insertDDL);
-
-                    int insertStatus = 0;
-                    if(compareTime(insertDDL)){
-                        insertStatus = 0;
-                    }else{
-                        insertStatus = 1;
-                    }
-                    values.put("status",insertStatus);
-                    db.insert("Missions",null,values);
-                    values.clear();
 
 
-
-                }
-                else{
+                } else {
                     SQLiteDatabase db = dbHelper.getWritableDatabase();
                     String updateTitle = title.getText().toString();
-                    Bitmap updateBitmap = ((BitmapDrawable)((ImageView) pic).getDrawable()).getBitmap();
+                    Bitmap updateBitmap = ((BitmapDrawable) ((ImageView) pic).getDrawable()).getBitmap();
                     String updateBase64 = bitmapToBase64(updateBitmap);
-                    if(updateBase64 == null){
+                    if (updateBase64 == null) {
                         updateBase64 = "";
                     }
-                    String updateDDL = ddlDate.getText().toString().replace('/','.')
+                    String updateDDL = ddlDate.getText().toString().replace('/', '.')
                             + "."
-                            + ddlTime.getText().toString().replace(':','.');
+                            + ddlTime.getText().toString().replace(':', '.');
                     String updateContent = content.getText().toString();
                     ContentValues values = new ContentValues();
-                    values.put("title",updateTitle);
-                    values.put("base64",updateBase64);
-                    values.put("content",updateContent);
-                    values.put("ddl",updateDDL);
+                    values.put("title", updateTitle);
+                    values.put("base64", updateBase64);
+                    values.put("content", updateContent);
+                    values.put("ddl", updateDDL);
 
                     int updateStatus = 0;
-                    if(compareTime(updateDDL)){
+                    if (compareTime(updateDDL)) {
                         updateStatus = 0;
-                    }else{
+                    } else {
                         updateStatus = 1;
                     }
-                    values.put("status",updateStatus);
-                    db.update("Missions",values,"id = ?",new String[]{id+""});
+                    values.put("status", updateStatus);
+                    db.update("Missions", values, "id = ?", new String[]{id + ""});
                     values.clear();
 
                 }
@@ -228,11 +246,11 @@ public class EditActivity extends AppCompatActivity {
         });
     }
 
-    private String bitmapToBase64(Bitmap bitmap){
+    private String bitmapToBase64(Bitmap bitmap) {
         String result = null;
         ByteArrayOutputStream baos = null;
-        try{
-            if(bitmap!=null){
+        try {
+            if (bitmap != null) {
                 baos = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 40, baos);
                 baos.flush();
@@ -240,64 +258,63 @@ public class EditActivity extends AppCompatActivity {
                 byte[] bitmapBytes = baos.toByteArray();
                 result = Base64.encodeToString(bitmapBytes, Base64.DEFAULT);
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        }finally {
-            try{
-                if(baos!=null){
+        } finally {
+            try {
+                if (baos != null) {
                     baos.flush();
                     baos.close();
                 }
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         return result;
     }
 
-    private boolean compareTime(String ddl){
+    private boolean compareTime(String ddl) {
         Calendar ddlCalendar = Calendar.getInstance();
         String[] splitDDL = ddl.split("\\.");
-        ddlCalendar = new GregorianCalendar(Integer.parseInt(splitDDL[0]),Integer.parseInt(splitDDL[1])-1,
-                Integer.parseInt(splitDDL[2]),Integer.parseInt(splitDDL[3]),Integer.parseInt(splitDDL[4]));
+        ddlCalendar = new GregorianCalendar(Integer.parseInt(splitDDL[0]), Integer.parseInt(splitDDL[1]) - 1,
+                Integer.parseInt(splitDDL[2]), Integer.parseInt(splitDDL[3]), Integer.parseInt(splitDDL[4]));
         Calendar now = Calendar.getInstance();
         return now.getTimeInMillis() < ddlCalendar.getTimeInMillis();
 
     }
 
 
-
-    private void setUpDialog(){
-        final String[] items = {"拍照","相册"};
+    private void setUpDialog() {
+        final String[] items = {"拍照", "相册"};
         AlertDialog.Builder listDialog = new AlertDialog.Builder(this);
         listDialog.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(which == 0){
-                    File outputImage = new File(getExternalCacheDir(),"output_image.jpg");
-                    try{
-                        if(outputImage.exists()){
+                if (which == 0) {
+                    File outputImage = new File(getExternalCacheDir(), "output_image.jpg");
+                    try {
+                        if (outputImage.exists()) {
                             outputImage.delete();
                         }
                         outputImage.createNewFile();
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    if(Build.VERSION.SDK_INT>=24){
+                    if (Build.VERSION.SDK_INT >= 24) {
                         picUri = FileProvider.getUriForFile(EditActivity.this,
-                                "com.example.ddl_alarm.fileprovider",outputImage);
-                    }else{
+                                "com.example.ddl_alarm.fileprovider", outputImage);
+                    } else {
                         picUri = Uri.fromFile(outputImage);
                     }
                     Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT,picUri);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, picUri);
                     startActivityForResult(intent, TAKE_PHOTO);
-                }else if(which == 1){
-                    if(ContextCompat.checkSelfPermission(EditActivity.this,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                } else if (which == 1) {
+                    if (ContextCompat.checkSelfPermission(EditActivity.this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(EditActivity.this, new
-                                String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
-                    }else{
+                                String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                    } else {
                         openAlbum();
                     }
                 }
@@ -306,20 +323,20 @@ public class EditActivity extends AppCompatActivity {
         listDialog.show();
     }
 
-    private void openAlbum(){
+    private void openAlbum() {
         Intent intent = new Intent("android.intent.action.GET_CONTENT");
         intent.setType("image/*");
         startActivityForResult(intent, CHOOSE_PHOTO);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
-        switch (requestCode){
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
             case 1:
-                if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openAlbum();
-                }else{
-                    Toast.makeText(this,"You denied the permission.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "You denied the permission.", Toast.LENGTH_SHORT).show();
                 }
                 break;
             default:
@@ -328,26 +345,26 @@ public class EditActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        super.onActivityResult(requestCode,resultCode,data);
-        switch (requestCode){
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
             case TAKE_PHOTO:
-                if(resultCode==RESULT_OK){
-                    try{
+                if (resultCode == RESULT_OK) {
+                    try {
                         Bitmap bitmap = BitmapFactory.decodeStream(
                                 getContentResolver().openInputStream(picUri)
                         );
                         pic.setImageBitmap(bitmap);
-                    }catch (FileNotFoundException e){
+                    } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
                 }
                 break;
             case CHOOSE_PHOTO:
-                if(resultCode == RESULT_OK){
-                    if (Build.VERSION.SDK_INT >= 19){
+                if (resultCode == RESULT_OK) {
+                    if (Build.VERSION.SDK_INT >= 19) {
                         handleImageOnKitKat(data);
-                    }else{
+                    } else {
                         handleImageBeforeKitKat(data);
                     }
                 }
@@ -358,39 +375,39 @@ public class EditActivity extends AppCompatActivity {
     }
 
     @TargetApi(19)
-    private void handleImageOnKitKat(Intent data){
+    private void handleImageOnKitKat(Intent data) {
         String imagePath = null;
         Uri uri = data.getData();
-        if(DocumentsContract.isDocumentUri(this, uri)){
+        if (DocumentsContract.isDocumentUri(this, uri)) {
             //document 类型 uri,使用 document id 处理
             String docId = DocumentsContract.getDocumentId(uri);
-            if("com.android.providers.media.documents".equals(uri.getAuthority())){
+            if ("com.android.providers.media.documents".equals(uri.getAuthority())) {
                 String id = docId.split(":")[1];
-                String selection = MediaStore.Images.Media._ID+"="+id;
-                imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,selection);
-            }else if("com.android.providers.downloads.documents".equals(uri.getAuthority())){
-                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),Long.valueOf(docId));
+                String selection = MediaStore.Images.Media._ID + "=" + id;
+                imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection);
+            } else if ("com.android.providers.downloads.documents".equals(uri.getAuthority())) {
+                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(docId));
                 imagePath = getImagePath(contentUri, null);
             }
-        }else if("content".equalsIgnoreCase(uri.getScheme())){
+        } else if ("content".equalsIgnoreCase(uri.getScheme())) {
             imagePath = getImagePath(uri, null);
-        }else if("file".equalsIgnoreCase(uri.getScheme())){
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
             imagePath = uri.getPath();
         }
         displayImage(imagePath);
     }
 
-    private void handleImageBeforeKitKat(Intent data){
+    private void handleImageBeforeKitKat(Intent data) {
         Uri uri = data.getData();
-        String imagePath = getImagePath(uri,null);
+        String imagePath = getImagePath(uri, null);
         displayImage(imagePath);
     }
 
-    private String getImagePath(Uri uri, String selection){
+    private String getImagePath(Uri uri, String selection) {
         String path = null;
-        Cursor cursor = getContentResolver().query(uri,null,selection,null,null);
-        if(cursor!=null){
-            if(cursor.moveToFirst()){
+        Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
                 path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
             }
             cursor.close();
@@ -398,41 +415,41 @@ public class EditActivity extends AppCompatActivity {
         return path;
     }
 
-    private void displayImage(String imagePath){
-        if(imagePath!=null){
+    private void displayImage(String imagePath) {
+        if (imagePath != null) {
             Bitmap bitmap = getBitmapFromUri(this, getImageContentUri(this, imagePath));
             pic.setImageBitmap(bitmap);
         }
     }
 
-    public static Uri getImageContentUri(Context context, String path){
+    public static Uri getImageContentUri(Context context, String path) {
         Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                new String[]{MediaStore.Images.Media._ID},MediaStore.Images.Media.DATA+"=?",
-                new String[]{path},null);
-        if(cursor!=null && cursor.moveToFirst()){
+                new String[]{MediaStore.Images.Media._ID}, MediaStore.Images.Media.DATA + "=?",
+                new String[]{path}, null);
+        if (cursor != null && cursor.moveToFirst()) {
             int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
             Uri baseUri = Uri.parse("content://media/external/images/media");
-            return Uri.withAppendedPath(baseUri,""+id);
-        }else{
-            if(new File(path).exists()){
+            return Uri.withAppendedPath(baseUri, "" + id);
+        } else {
+            if (new File(path).exists()) {
                 ContentValues values = new ContentValues();
                 values.put(MediaStore.Images.Media.DATA, path);
                 return context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-            }else{
+            } else {
                 return null;
             }
         }
     }
 
-    public static Bitmap getBitmapFromUri(Context context, Uri uri){
-        try{
+    public static Bitmap getBitmapFromUri(Context context, Uri uri) {
+        try {
             ParcelFileDescriptor parcelFileDescriptor =
-                    context.getContentResolver().openFileDescriptor(uri,"r");
+                    context.getContentResolver().openFileDescriptor(uri, "r");
             FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
             Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
             parcelFileDescriptor.close();
             return image;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
