@@ -100,7 +100,6 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
             @Override
             public void onFinish() {
                 holder.time2ddl.setText("已超时");
-                //TODO update database
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
                 ContentValues values = new ContentValues();
                 values.put("status",1);

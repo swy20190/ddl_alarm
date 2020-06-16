@@ -104,7 +104,9 @@ public class DetailActivity extends AppCompatActivity {
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
                 ContentValues values = new ContentValues();
                 values.put("status",2);
-                db.update("Missions",values,"name = ?",new String[]{id+""});
+                db.update("Missions",values,"id = ?",new String[]{id+""});
+                Intent intent = new Intent(DetailActivity.this,MainActivity.class);
+                startActivity(intent);
             }
         });
 
