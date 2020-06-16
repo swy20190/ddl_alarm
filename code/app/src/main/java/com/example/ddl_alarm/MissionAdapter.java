@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.CountDownTimer;
 import android.util.Base64;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,13 +19,18 @@ import java.util.Date;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHolder> {
+
     private ArrayList<Mission> mMissionList;
-    static class ViewHolder extends RecyclerView.ViewHolder{
+
+    private int position;
+    static class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener{
         View missionView;
         CircleImageView missionPic;
         TextView title;
         TextView ddl;
         TextView time2ddl;
+
+
 
         public ViewHolder(View view){
             super(view);
@@ -33,6 +39,12 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
             title = (TextView) view.findViewById(R.id.mission_item_title);
             ddl = (TextView) view.findViewById(R.id.mission_time_ddl);
             time2ddl = (TextView) view.findViewById(R.id.mission_item_time2DDL);
+            view.setOnCreateContextMenuListener(this);
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo){
+            contextMenu.add("删除");
         }
     }
 
@@ -57,6 +69,7 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
                 v.getContext().startActivity(intent);
             }
         });
+
         return holder;
     }
 
@@ -95,11 +108,31 @@ public class MissionAdapter extends RecyclerView.Adapter<MissionAdapter.ViewHold
         }catch (Exception e){
             holder.missionPic.setImageResource(R.mipmap.ic_launcher);
         }
+        holder.missionView.setOnLongClickListener(new View.OnLongClickListener(){
+            @Override
+            public boolean onLongClick(View view){
+                setPosition(holder.getLayoutPosition());
+                return false;
+            }
+        });
     }
 
     @Override
     public int getItemCount(){
         return mMissionList.size();
+    }
+
+    @Override
+    public void onViewRecycled(ViewHolder holder){
+        holder.missionView.setOnLongClickListener(null);
+        super.onViewRecycled(holder);
+    }
+    public int getPosition(){
+        return this.position;
+    }
+
+    public void setPosition(int position){
+        this.position = position;
     }
 
 }

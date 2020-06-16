@@ -10,8 +10,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -58,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+
         swipeRefreshLayout = (SwipeRefreshLayout)findViewById(R.id.main_swipe);
         swipeRefreshLayout.setColorSchemeResources(R.color.backGroundColor);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -66,6 +70,24 @@ public class MainActivity extends AppCompatActivity {
                 refreshMissions();
             }
         });
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item){
+        int position = adapter.getPosition();
+        switch (item.getItemId()){
+            case 0:
+                // Toast.makeText(this,position+"",Toast.LENGTH_SHORT).show();
+                int idDelete = missions.get(position).getId();
+                SQLiteDatabase dbDelete = dbHelper.getWritableDatabase();
+                dbDelete.delete("Missions","id = ?", new String[]{idDelete+""});
+                missions.remove(position);
+                refreshMissions();
+                break;
+            default:
+                break;
+        }
+        return super.onContextItemSelected(item);
     }
 
     private void initMissions(){
