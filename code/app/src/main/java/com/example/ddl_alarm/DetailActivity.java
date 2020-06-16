@@ -3,6 +3,7 @@ package com.example.ddl_alarm;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -36,9 +37,11 @@ public class DetailActivity extends AppCompatActivity {
     private String contentString;
     private Date ddlDate;
     private String base64;
+    private int status;
 
     private MyDatabaseHelper dbHelper;
 
+    @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +62,7 @@ public class DetailActivity extends AppCompatActivity {
         title = intent.getStringExtra("title");
         contentString = intent.getStringExtra("content");
         // base64 = intent.getStringExtra("base64");
+        status = intent.getIntExtra("status",0);
 
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.query("Missions",null,"id = ?",new String[]{id+""},null,null,null);
@@ -86,6 +90,9 @@ public class DetailActivity extends AppCompatActivity {
 
         ddl.setText(intent.getSerializableExtra("ddl").toString());
 
+        if(status!=0){
+            toEdit.setVisibility(View.GONE);
+        }
         toEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

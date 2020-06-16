@@ -1,5 +1,6 @@
 package com.example.ddl_alarm;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
@@ -38,7 +39,22 @@ public class TerminatedAdapter extends RecyclerView.Adapter<TerminatedAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.terminated_item,parent,false);
-        ViewHolder holder = new ViewHolder(view);
+        final ViewHolder holder = new ViewHolder(view);
+        holder.missionView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = holder.getAdapterPosition();
+                Mission currentMission = missions.get(position);
+                Intent intent = new Intent(v.getContext(),DetailActivity.class);
+                intent.putExtra("title",currentMission.getTitle());
+                intent.putExtra("id",currentMission.getId());
+                intent.putExtra("content",currentMission.getContent());
+                // intent.putExtra("base64",currentMission.getBase64());
+                intent.putExtra("ddl",currentMission.getDdl());
+                intent.putExtra("status",2);
+                v.getContext().startActivity(intent);
+            }
+        });
         return holder;
     }
 
