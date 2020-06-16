@@ -26,6 +26,7 @@
         android:layout_height="0dp"
         android:layout_weight="2"
         android:background="#000000"
+        android:textColor="@color/white"
         android:hint="编辑任务详情"
         android:textSize="20dp"
         android:id="@+id/edit_content"/>
@@ -44,6 +45,7 @@
         android:layout_weight="1"
         android:background="@color/cardColor"
         android:id="@+id/edit_ddl_time"
+        android:textColor="@color/white"
         android:text="点击设置ddl时间"
         android:textSize="20dp"/>
     <Button

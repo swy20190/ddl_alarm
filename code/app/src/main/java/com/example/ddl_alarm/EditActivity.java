@@ -127,7 +127,7 @@ public class EditActivity extends AppCompatActivity {
                         new TimePickerDialog.OnTimeSetListener() {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                                ddlTime.setText(hourOfDay+" : "+minute);
+                                ddlTime.setText(hourOfDay+":"+minute);
                             }
                         },mHour,mMinute,true);
                 timePickerDialog.show();
@@ -196,7 +196,6 @@ public class EditActivity extends AppCompatActivity {
 
                 }
                 else{
-                    // TODO update
                     SQLiteDatabase db = dbHelper.getWritableDatabase();
                     String updateTitle = title.getText().toString();
                     Bitmap updateBitmap = ((BitmapDrawable)((ImageView) pic).getDrawable()).getBitmap();
@@ -258,7 +257,7 @@ public class EditActivity extends AppCompatActivity {
 
     private boolean compareTime(String ddl){
         Calendar ddlCalendar = Calendar.getInstance();
-        String[] splitDDL = ddl.split(".");
+        String[] splitDDL = ddl.split("\\.");
         ddlCalendar = new GregorianCalendar(Integer.parseInt(splitDDL[0]),Integer.parseInt(splitDDL[1])-1,
                 Integer.parseInt(splitDDL[2]),Integer.parseInt(splitDDL[3]),Integer.parseInt(splitDDL[4]));
         Calendar now = Calendar.getInstance();
